@@ -1,0 +1,33 @@
+create database project;
+describe integration onlinestore;
+CREATE OR REPLACE TABLE online_sales (
+    Invoice VARCHAR,
+    StockCode VARCHAR,
+    Description VARCHAR,
+    Quantity INT,
+    InvoiceDate TIMESTAMP,
+    Price FLOAT,
+    Customer FLOAT,
+    Country VARCHAR
+);
+
+create stage onlinesg
+url = 's3://onlinebuc/onlinesales/'
+storage_integration = onlinestore
+file_format = (type = 'CSV' skip_header = 1);
+COPY INTO online_sales
+FROM @onlinesg
+FILE_FORMAT = (TYPE = 'CSV' FIELD_DELIMITER = ';' SKIP_HEADER = 1);
+
+
+
+select * from online_sales;
+
+select Invoice 
+from online_sales
+
+DELETE FROM online_sales WHERE Customer IS NULL;
+
+
+ALTER TABLE online_sales ADD COLUMN TotalAmount FLOAT;
+UPDATE online_sales SET TotalAmount = Quantity * Price;
